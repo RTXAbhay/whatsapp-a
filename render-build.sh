@@ -1,8 +1,7 @@
-#!/usr/bin/env bash
-# Install system dependencies for Chromium
-apt-get update
-apt-get install -y wget gnupg ca-certificates
-apt-get install -y chromium
+#!/bin/bash
+# Install npm dependencies
+npm uninstall puppeteer-core
+npm install puppeteer
 
-# Install Node.js dependencies
+# Continue any other build steps
 npm install
