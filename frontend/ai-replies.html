@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Replies</title>
+<script src="/socket.io/socket.io.js"></script>
+<script src="ai-replies.js" defer></script>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  #ai-replies { max-height: 500px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }
+  p { margin: 5px 0; }
+  #back-btn { margin-top: 20px; padding: 5px 10px; cursor: pointer; }
+</style>
+</head>
+<body>
+<h2>AI Replies</h2>
+<div id="ai-replies"></div>
+<button id="back-btn">Back to Dashboard</button>
+</body>
+</html>

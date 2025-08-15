@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsBot AI Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="dashboard">
+  <h2>WhatsBot AI Dashboard</h2>
+
+  <div id="login-status"></div>
+
+  <!-- QR Section -->
+  <div class="qr-section">
+    <img id="qr-img" src="" alt="QR Code">
+    <button onclick="reloadQR()">Reload QR</button>
+    <p id="qr-status">Waiting for QR scan...</p>
+    <button id="logout-wa-btn">Logout WhatsApp</button>
+
+  </div>
+
+  <!-- Toggle Section -->
+  <div class="toggle-section">
+    <label>
+      <input type="checkbox" id="toggle-new" onchange="saveToggles()"> Reply Current Messages
+    </label>
+    <label>
+      <input type="checkbox" id="toggle-old" onchange="saveToggles()"> Reply Previous Messages
+    </label>
+  </div>
+
+  <!-- AI Instructions -->
+  <div class="instructions">
+    <textarea id="instructions" placeholder="Enter your AI instructions (max 500 words)"></textarea>
+    <button onclick="saveInstructions()">Save Instructions</button>
+  </div>
+
+  <!-- AI Replies -->
+  <button onclick="goToAIReplies()">AI Reply</button>
+  <div class="messages">
+    <h3>AI Replies</h3>
+    <div id="ai-replies"></div>
+  </div>
+
+  <button onclick="logout()">Logout</button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>
