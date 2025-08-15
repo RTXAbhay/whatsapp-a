@@ -32,7 +32,9 @@ app.use(express.static("frontend"));
 // --- AUTH --- //
 app.post("/register", (req, res) => {
   const { username, password, secret } = req.body;
-  if (secret !== "abhay@123") return res.json({ success: false, msg: "Invalid secret code" });
+  if (secret !== process.env.REGISTER_SECRET) {
+    return res.json({ success: false, msg: "Invalid secret code" });
+  }
   if (users[username]) return res.json({ success: false, msg: "User exists" });
 
   users[username] = { password, instructions: "", toggles: { current: true, previous: true } };
@@ -42,7 +44,9 @@ app.post("/register", (req, res) => {
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
-  if (!users[username] || users[username].password !== password) return res.json({ success: false, msg: "Invalid credentials" });
+  if (!users[username] || users[username].password !== password) {
+    return res.json({ success: false, msg: "Invalid credentials" });
+  }
   res.json({ success: true, user: username });
 });
 
@@ -51,8 +55,9 @@ app.post("/saveInstructions", (req, res) => {
   if (users[username]) {
     users[username].instructions = instructions;
     fs.writeJsonSync(USERS_FILE, users);
-    res.json({ success: true });
-  } else res.json({ success: false });
+    return res.json({ success: true });
+  }
+  res.json({ success: false });
 });
 
 app.post("/saveToggles", (req, res) => {
@@ -60,8 +65,9 @@ app.post("/saveToggles", (req, res) => {
   if (users[username]) {
     users[username].toggles = toggles;
     fs.writeJsonSync(USERS_FILE, users);
-    res.json({ success: true });
-  } else res.json({ success: false });
+    return res.json({ success: true });
+  }
+  res.json({ success: false });
 });
 
 app.get("/users.json", (req, res) => {
@@ -88,21 +94,20 @@ app.post("/logoutWhatsApp", async (req, res) => {
 io.on("connection", (socket) => {
   console.log("New socket connected");
 
-  // Initialize WhatsApp client
   socket.on("init-client", async ({ username }) => {
     await initWhatsAppClient(username, socket);
-
-    // Send existing AI replies to new client
     socket.emit("load-ai-replies", aiReplies);
   });
 
-  // Receive and store AI replies
   socket.on("ai-reply", (msg) => {
     aiReplies.push(msg);
     saveAIReplies();
-    io.emit("ai-reply", msg); // Broadcast to all connected clients
+    io.emit("ai-reply", msg);
   });
 });
 
+// ✅ Use Render's dynamic port
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
