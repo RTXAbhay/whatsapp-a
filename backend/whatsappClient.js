@@ -3,7 +3,6 @@ const { Client, LocalAuth } = require("whatsapp-web.js");
 const fs = require("fs-extra");
 const { CohereClient } = require("cohere-ai");
 const qrcode = require("qrcode");
-const puppeteer = require("puppeteer"); // Added
 
 // Initialize Cohere client
 const co = new CohereClient({ apiKey: process.env.CO_API_KEY });
@@ -32,15 +31,19 @@ async function initWhatsAppClient(username, socket) {
         "--no-zygote",
         "--single-process",
         "--disable-gpu"
-      ],
-      executablePath: process.env.CHROME_PATH || (await puppeteer.executablePath()) // FIX: set path for Render
+      ]
+      // No executablePath needed; Puppeteer handles Chromium automatically
     }
   });
 
   // QR code generation
   client.on("qr", async (qr) => {
-    const qrImage = await qrcode.toDataURL(qr);
-    socket.emit("qr", { qr: qrImage, user: username });
+    try {
+      const qrImage = await qrcode.toDataURL(qr);
+      socket.emit("qr", { qr: qrImage, user: username });
+    } catch (err) {
+      console.error("QR generation error:", err);
+    }
   });
 
   // WhatsApp ready
@@ -53,6 +56,17 @@ async function initWhatsAppClient(username, socket) {
   // Authenticated
   client.on("authenticated", () => {
     console.log(username + " Authenticated");
+  });
+
+  // Disconnected / Error handling
+  client.on("disconnected", (reason) => {
+    console.log(username + " disconnected:", reason);
+    delete clients[username];
+  });
+
+  client.on("auth_failure", (msg) => {
+    console.error(username + " auth failure:", msg);
+    socket.emit("client-error", { msg: "WhatsApp authentication failed" });
   });
 
   // Message handler
@@ -85,8 +99,14 @@ async function initWhatsAppClient(username, socket) {
     }
   });
 
-  client.initialize();
-  clients[username] = client;
+  try {
+    await client.initialize();
+    clients[username] = client;
+  } catch (err) {
+    console.error("WhatsApp client init failed:", err.message);
+    socket.emit("client-error", { msg: err.message });
+  }
+
   return client;
 }
 
