@@ -3,6 +3,7 @@ const { Client, LocalAuth } = require("whatsapp-web.js");
 const fs = require("fs-extra");
 const { CohereClient } = require("cohere-ai");
 const qrcode = require("qrcode");
+const puppeteer = require("puppeteer"); // Added
 
 // Initialize Cohere client
 const co = new CohereClient({ apiKey: process.env.CO_API_KEY });
@@ -20,7 +21,20 @@ async function initWhatsAppClient(username, socket) {
 
   const client = new Client({
     authStrategy: new LocalAuth({ clientId: username, dataPath: SESSIONS_DIR }),
-    puppeteer: { headless: true },
+    puppeteer: {
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--single-process",
+        "--disable-gpu"
+      ],
+      executablePath: process.env.CHROME_PATH || (await puppeteer.executablePath()) // FIX: set path for Render
+    }
   });
 
   // QR code generation
