@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Install Chromium
+# Install system dependencies for Chromium
 apt-get update
-apt-get install -y chromium-browser
+apt-get install -y wget gnupg ca-certificates
+apt-get install -y chromium
 
-# Continue with normal install
+# Install Node.js dependencies
 npm install
