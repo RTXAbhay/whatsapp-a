@@ -95,7 +95,12 @@ io.on("connection", (socket) => {
   console.log("New socket connected");
 
   socket.on("init-client", async ({ username }) => {
-    await initWhatsAppClient(username, socket);
+    try {
+      await initWhatsAppClient(username, socket);
+    } catch (err) {
+      console.error("WhatsApp client init failed:", err.message);
+      socket.emit("client-error", { msg: err.message });
+    }
     socket.emit("load-ai-replies", aiReplies);
   });
 
@@ -103,6 +108,10 @@ io.on("connection", (socket) => {
     aiReplies.push(msg);
     saveAIReplies();
     io.emit("ai-reply", msg);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected");
   });
 });
 
